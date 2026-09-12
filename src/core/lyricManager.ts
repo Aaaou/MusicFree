@@ -338,9 +338,16 @@ class LyricManager implements IInjectable {
     }
 
     /** 将当前歌词行同步到媒体会话标题，供支持动态媒体信息的蓝牙设备读取。 */
-    syncBluetoothLyric() {
+    async syncBluetoothLyric() {
         const musicItem = this.trackPlayer?.currentMusic;
         if (!musicItem) {
+            return;
+        }
+
+        // 切歌事件早于新音源入队。仅在第 0 条真实队列项确认属于当前歌曲后更新，
+        // 避免把歌词和封面写到上一首歌曲上。
+        const currentTrack = await RNTrackPlayer.getTrack(0).catch(() => undefined);
+        if (!currentTrack || !isSameMediaItem(musicItem, currentTrack as IMusic.IMusicItem)) {
             return;
         }
 
@@ -352,7 +359,8 @@ class LyricManager implements IInjectable {
         const title = originalLyric
             ? [originalLyric, translation].filter(Boolean).join("\n")
             : musicItem.title;
-        const artwork = resolveImportedAssetOrPath(
+        // 优先复用播放器入队时已规范化的封面，防止歌词刷新覆盖有效的封面 URI。
+        const artwork = currentTrack.artwork || resolveImportedAssetOrPath(
             musicItem.artwork?.trim?.()?.length
                 ? musicItem.artwork
                 : ImgAsset.albumDefault,
