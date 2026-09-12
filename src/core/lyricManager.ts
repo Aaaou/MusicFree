@@ -354,6 +354,7 @@ class LyricManager implements IInjectable {
             artist: musicItem.artist,
             album: musicItem.album,
             duration: musicItem.duration,
+            artwork: musicItem.artwork,
         }).catch(() => {
             // 媒体会话不可用时不影响播放。
         });
