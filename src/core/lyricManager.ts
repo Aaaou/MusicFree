@@ -359,8 +359,8 @@ class LyricManager implements IInjectable {
         const title = originalLyric
             ? [originalLyric, translation].filter(Boolean).join("\n")
             : musicItem.title;
-        // 优先复用播放器入队时已规范化的封面，防止歌词刷新覆盖有效的封面 URI。
-        const artwork = currentTrack.artwork || resolveImportedAssetOrPath(
+        // 始终复用 setQueue 时固定的规范化封面，避免读取已被歌词刷新修改的队列元数据。
+        const artwork = this.trackPlayer.getCurrentTrackArtwork() || resolveImportedAssetOrPath(
             musicItem.artwork?.trim?.()?.length
                 ? musicItem.artwork
                 : ImgAsset.albumDefault,

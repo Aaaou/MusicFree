@@ -173,6 +173,9 @@ export interface ITrackPlayer extends IInjectable, EventEmitter<{
      */
     getProgress(): Promise<Progress>;
 
+    /** 获取当前音源入队时已规范化的封面，供媒体元数据刷新复用。 */
+    getCurrentTrackArtwork(): string | undefined;
+
     /**
      * 获取当前播放速率
      * @returns 当前播放速率

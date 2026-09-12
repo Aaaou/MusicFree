@@ -67,6 +67,8 @@ class TrackPlayer extends EventEmitter<{
     private serviceInited = false;
     // 播放队列索引map
     private playListIndexMap = createMediaIndexMap([] as IMusic.IMusicItem[]);
+    // setQueue 前已处理为原生播放器可读取形式的当前封面。
+    private currentTrackArtwork: string | undefined;
 
 
     private static maxMusicQueueLength = 10000;
@@ -736,6 +738,7 @@ class TrackPlayer extends EventEmitter<{
     }
 
     getProgress = ReactNativeTrackPlayer.getProgress;
+    getCurrentTrackArtwork = () => this.currentTrackArtwork;
     getRate = ReactNativeTrackPlayer.getRate;
     setRate = ReactNativeTrackPlayer.setRate;
     reset = ReactNativeTrackPlayer.reset;
@@ -803,6 +806,7 @@ class TrackPlayer extends EventEmitter<{
             return;
         }
         await ReactNativeTrackPlayer.setQueue([clonedTrack, this.getFakeNextTrack()]);
+        this.currentTrackArtwork = clonedTrack.artwork as string | undefined;
         PersistStatus.set("music.musicItem", track as IMusic.IMusicItem);
         PersistStatus.set("music.progress", 0);
         if (autoPlay) {
