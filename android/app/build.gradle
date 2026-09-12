@@ -125,12 +125,13 @@ android {
     namespace "fun.upup.musicfree"
 
     defaultConfig {
-        // 使用独立 applicationId，允许歌词增强版与原版并行安装。
-        applicationId "fun.upup.musicfree.lyrics"
+        // 小米背屏中心按包名识别音乐播放器；此仅用于个人背屏兼容测试。
+        // 安装前必须卸载同包名的酷我音乐，不能用于常规发布。
+        applicationId "cn.kuwo.player"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode
-        versionName "${appVersion}-lyrics"
+        versionName "${appVersion}-lyrics-kuwo-test"
     }
     signingConfigs {
         debug {
