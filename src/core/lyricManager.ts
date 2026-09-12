@@ -9,9 +9,8 @@ import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { Plugin } from "./pluginManager";
 
 import pathConst from "@/constants/pathConst";
-import { ImgAsset } from "@/constants/assetsConst";
 import LyricUtil from "@/native/lyricUtil";
-import { checkAndCreateDir, resolveImportedAssetOrPath } from "@/utils/fileUtils";
+import { checkAndCreateDir } from "@/utils/fileUtils";
 import PersistStatus from "@/utils/persistStatus";
 import CryptoJs from "crypto-js";
 import { unlink, writeFile } from "react-native-fs";
@@ -359,21 +358,13 @@ class LyricManager implements IInjectable {
         const title = originalLyric
             ? [originalLyric, translation].filter(Boolean).join("\n")
             : musicItem.title;
-        // 始终复用 setQueue 时固定的规范化封面，避免读取已被歌词刷新修改的队列元数据。
-        const artwork = this.trackPlayer.getCurrentTrackArtwork() || resolveImportedAssetOrPath(
-            musicItem.artwork?.trim?.()?.length
-                ? musicItem.artwork
-                : ImgAsset.albumDefault,
-        ) as unknown as string;
-
-        // updateNowPlayingMetadata 在当前 RNTP Android 实现中只覆盖通知元数据；
-        // 更新当前队列条目才能使底层 MediaSession/AVRCP 接收到新标题。
-        RNTrackPlayer.updateMetadataForTrack(0, {
+        // Android RNTP 会通过此接口更新同一 MediaSession 的展示元数据，
+        // 且不会 replaceItem 重建当前音频条目，因而能保留已加载的封面 bitmap。
+        RNTrackPlayer.updateNowPlayingMetadata({
             title,
             artist: musicItem.artist,
             album: musicItem.album,
             duration: musicItem.duration,
-            artwork,
         }).catch(() => {
             // 媒体会话不可用时不影响播放。
         });
