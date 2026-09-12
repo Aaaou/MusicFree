@@ -19,7 +19,8 @@
     "connect-mumu": "adb kill-server & adb connect localhost:7555",
     "build-android": "cd .\\android\\ && .\\gradlew assembleRelease",
     "generate-assets": "node ./generator/generate-assets.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "node ./patches/apply-rntp-artwork-metadata-patch.cjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
