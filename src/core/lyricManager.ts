@@ -63,6 +63,7 @@ class LyricManager implements IInjectable {
         // 更新歌词
         this.trackPlayer.on(TrackPlayerEvents.CurrentMusicChanged, (musicItem) => {
             this.refreshLyric(true, true);
+            this.syncBluetoothLyric();
 
             if (this.appConfig.getConfig("lyric.showStatusBarLyric")) {
                 if (musicItem) {
@@ -87,6 +88,7 @@ class LyricManager implements IInjectable {
             if (currentLyricItem?.lrc !== newLyricItem?.lrc) {
                 // 更新当前歌词状态
                 getDefaultStore().set(currentLyricItemAtom, newLyricItem ?? null);
+                this.syncBluetoothLyric();
 
                 // 更新状态栏歌词
                 const showTranslation = PersistStatus.get("lyric.showTranslation");
@@ -231,6 +233,7 @@ class LyricManager implements IInjectable {
             hasTranslation: false,
         });
         getDefaultStore().set(currentLyricItemAtom, null);
+        this.syncBluetoothLyric();
     }
 
     private setLyricAsNoLyricState() {
@@ -310,6 +313,7 @@ class LyricManager implements IInjectable {
 
             const currentLyric = ignoreProgress ? (this.lyricParser.getLyricItems()?.[0] ?? null) : this.lyricParser.getPosition((await this.trackPlayer.getProgress()).position);
             getDefaultStore().set(currentLyricItemAtom, currentLyric || null);
+            this.syncBluetoothLyric();
 
             if (this.appConfig.getConfig("lyric.showStatusBarLyric")) {
                 if (currentLyric) {
@@ -330,6 +334,29 @@ class LyricManager implements IInjectable {
                 this.setLyricAsNoLyricState();
             }
         }
+    }
+
+    /** 将当前歌词行同步到媒体会话标题，供支持动态媒体信息的蓝牙设备读取。 */
+    syncBluetoothLyric() {
+        const musicItem = this.trackPlayer?.currentMusic;
+        if (!musicItem) {
+            return;
+        }
+
+        const enabled = this.appConfig?.getConfig("lyric.showBluetoothLyric");
+        const lyric = enabled ? this.currentLyricItem : null;
+        const title = lyric?.lrc?.trim() || musicItem.title;
+
+        // updateNowPlayingMetadata 在当前 RNTP Android 实现中只覆盖通知元数据；
+        // 更新当前队列条目才能使底层 MediaSession/AVRCP 接收到新标题。
+        RNTrackPlayer.updateMetadataForTrack(0, {
+            title,
+            artist: musicItem.artist,
+            album: musicItem.album,
+            duration: musicItem.duration,
+        }).catch(() => {
+            // 媒体会话不可用时不影响播放。
+        });
     }
 
     /**

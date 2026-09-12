@@ -94,6 +94,7 @@ class AppConfig implements IAppConfig {
                 ["setting.lyric.fontSize", "lyric.fontSize"],
                 ["setting.lyric.detailFontSize", "lyric.detailFontSize"],
                 ["setting.lyric.autoSearchLyric", "lyric.autoSearchLyric"],
+                ["setting.lyric.showBluetoothLyric", "lyric.showBluetoothLyric"],
 
                 // Theme
                 ["setting.theme.background", "theme.background"],

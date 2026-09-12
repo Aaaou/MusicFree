@@ -125,11 +125,12 @@ android {
     namespace "fun.upup.musicfree"
 
     defaultConfig {
-        applicationId "fun.upup.musicfree"
+        // 使用独立 applicationId，允许歌词增强版与原版并行安装。
+        applicationId "fun.upup.musicfree.lyrics"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode
-        versionName appVersion
+        versionName "${appVersion}-lyrics"
     }
     signingConfigs {
         debug {

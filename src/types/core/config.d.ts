@@ -43,6 +43,8 @@ export interface IAppConfigProperties {
     "lyric.fontSize": number;
     "lyric.detailFontSize": number;
     "lyric.autoSearchLyric": boolean;
+    /** 将当前歌词行写入媒体会话标题，供支持动态媒体信息的蓝牙设备显示 */
+    "lyric.showBluetoothLyric": boolean;
 
     // Theme
     "theme.background": string;

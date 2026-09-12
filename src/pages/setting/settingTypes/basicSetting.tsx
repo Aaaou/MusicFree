@@ -12,6 +12,7 @@ import { useI18N } from "@/core/i18n";
 import { ROUTE_PATH, useNavigate } from "@/core/router";
 import useColors from "@/hooks/useColors";
 import LyricUtil, { NativeTextAlignment } from "@/native/lyricUtil";
+import lyricManager from "@/core/lyricManager";
 import { AppConfigPropertyKey } from "@/types/core/config";
 import { clearCache, getCacheSize, sizeFormatter } from "@/utils/fileUtils";
 import { clearLog, getErrorLogContent } from "@/utils/log";
@@ -673,6 +674,7 @@ function LyricSetting() {
      *     "lyric.fontSize": number;
      *     "lyric.detailFontSize": number;
      *     "lyric.autoSearchLyric": boolean;
+     *     "lyric.showBluetoothLyric": boolean;
      */
     const showStatusBarLyric = useAppConfig("lyric.showStatusBarLyric");
     const topPercent = useAppConfig("lyric.topPercent");
@@ -683,6 +685,7 @@ function LyricSetting() {
     const widthPercent = useAppConfig("lyric.widthPercent");
     const fontSize = useAppConfig("lyric.fontSize");
     const enableAutoSearchLyric = useAppConfig("lyric.autoSearchLyric");
+    const showBluetoothLyric = useAppConfig("lyric.showBluetoothLyric");
 
 
 
@@ -694,6 +697,16 @@ function LyricSetting() {
         t("basicSettings.lyric.autoSearchLyric"),
         "lyric.autoSearchLyric",
         enableAutoSearchLyric ?? false,
+    );
+
+    const bluetoothLyric = createSwitch(
+        t("basicSettings.lyric.showBluetoothLyric"),
+        "lyric.showBluetoothLyric",
+        showBluetoothLyric ?? false,
+        newValue => {
+            Config.setConfig("lyric.showBluetoothLyric", newValue);
+            lyricManager.syncBluetoothLyric();
+        },
     );
 
     const openStatusBarLyric = createSwitch(
@@ -770,6 +783,13 @@ function LyricSetting() {
                 onPress={openStatusBarLyric.onPress}>
                 <ListItem.Content title={openStatusBarLyric.title} />
                 {openStatusBarLyric.right}
+            </ListItem>
+            <ListItem
+                withHorizontalPadding
+                heightType="small"
+                onPress={bluetoothLyric.onPress}>
+                <ListItem.Content title={bluetoothLyric.title} />
+                {bluetoothLyric.right}
             </ListItem>
             <View style={lyricStyles.sliderContainer}>
                 <ThemeText>{t("basicSettings.lyric.leftRightDistance")}</ThemeText>
