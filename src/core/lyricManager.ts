@@ -346,12 +346,14 @@ class LyricManager implements IInjectable {
         const enabled = this.appConfig?.getConfig("lyric.showBluetoothLyric");
         const lyric = enabled ? this.currentLyricItem : null;
         const title = lyric?.lrc?.trim() || musicItem.title;
+        // 背屏第二行优先显示逐行匹配的译文；无译文或非歌词模式时保留歌手。
+        const artist = lyric?.translation?.trim() || musicItem.artist;
 
         // updateNowPlayingMetadata 在当前 RNTP Android 实现中只覆盖通知元数据；
         // 更新当前队列条目才能使底层 MediaSession/AVRCP 接收到新标题。
         RNTrackPlayer.updateMetadataForTrack(0, {
             title,
-            artist: musicItem.artist,
+            artist,
             album: musicItem.album,
             duration: musicItem.duration,
             artwork: musicItem.artwork,
