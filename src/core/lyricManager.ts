@@ -9,8 +9,9 @@ import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { Plugin } from "./pluginManager";
 
 import pathConst from "@/constants/pathConst";
+import { ImgAsset } from "@/constants/assetsConst";
 import LyricUtil from "@/native/lyricUtil";
-import { checkAndCreateDir } from "@/utils/fileUtils";
+import { checkAndCreateDir, resolveImportedAssetOrPath } from "@/utils/fileUtils";
 import PersistStatus from "@/utils/persistStatus";
 import CryptoJs from "crypto-js";
 import { unlink, writeFile } from "react-native-fs";
@@ -345,18 +346,26 @@ class LyricManager implements IInjectable {
 
         const enabled = this.appConfig?.getConfig("lyric.showBluetoothLyric");
         const lyric = enabled ? this.currentLyricItem : null;
-        const title = lyric?.lrc?.trim() || musicItem.title;
-        // 背屏第二行优先显示逐行匹配的译文；无译文或非歌词模式时保留歌手。
-        const artist = lyric?.translation?.trim() || musicItem.artist;
+        const originalLyric = lyric?.lrc?.trim();
+        const translation = lyric?.translation?.trim();
+        // 小米背屏会持续刷新标题，但可能缓存歌手字段，因此双语歌词均放入标题。
+        const title = originalLyric
+            ? [originalLyric, translation].filter(Boolean).join("\n")
+            : musicItem.title;
+        const artwork = resolveImportedAssetOrPath(
+            musicItem.artwork?.trim?.()?.length
+                ? musicItem.artwork
+                : ImgAsset.albumDefault,
+        ) as unknown as string;
 
         // updateNowPlayingMetadata 在当前 RNTP Android 实现中只覆盖通知元数据；
         // 更新当前队列条目才能使底层 MediaSession/AVRCP 接收到新标题。
         RNTrackPlayer.updateMetadataForTrack(0, {
             title,
-            artist,
+            artist: musicItem.artist,
             album: musicItem.album,
             duration: musicItem.duration,
-            artwork: musicItem.artwork,
+            artwork,
         }).catch(() => {
             // 媒体会话不可用时不影响播放。
         });
